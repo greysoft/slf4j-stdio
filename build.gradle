@@ -1,0 +1,24 @@
+// Need to explicitly run jacocoTestReport task to generate HTML report, but
+// test.exec is automatically created by a build. The HTML report is created
+// from the test.exec file.
+plugins {
+	id 'java-library'
+	id 'jacoco'
+	id 'eclipse'
+}
+
+repositories {
+	jcenter()
+}
+
+allprojects {
+	group = "$buildGroup"
+	version = "$buildVersion"
+}
+
+dependencies {
+	api "org.slf4j:slf4j-api:$versionSLF4J"
+
+	testImplementation "junit:junit:$versionJUNIT"
+	testImplementation "org.mockito:mockito-core:$versionMockito"
+}
