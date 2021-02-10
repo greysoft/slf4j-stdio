@@ -5,7 +5,6 @@
 package com.grey.loggers.slf4j_stdio.text;
 
 import java.io.PrintStream;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +41,7 @@ public class LogPrinterText implements LogPrinter {
 	}
 
 	@Override
-	public void renderLog(String logname, long logtime, Defs.LOGLEVEL lvl, String msg, Throwable ex) {
+	public void renderLog(String logname, String timestamp, Defs.LOGLEVEL lvl, String msg, Throwable ex) {
 		Thread thrd = Thread.currentThread();
 		StringBuilder sb = new StringBuilder();
 
@@ -52,7 +51,7 @@ public class LogPrinterText implements LogPrinter {
 			case TOKEN:
 				FMT_TOKEN token = (FMT_TOKEN)term.getValue();
 				if (token == FMT_TOKEN.TIME) {
-					txt = Instant.ofEpochMilli(logtime).toString();
+					txt = timestamp;
 				} else if (token == FMT_TOKEN.LVL) {
 					txt = lvl.name();
 				} else if (token == FMT_TOKEN.TID) {
@@ -75,13 +74,17 @@ public class LogPrinterText implements LogPrinter {
 			}
 			sb.append(txt);
 		}
-		logStream.println(sb.toString());
-		if (ex != null) ex.printStackTrace(logStream);
+		writeLog(sb.toString(), ex);
 	}
 
 	@Override
 	public void flush() throws java.io.IOException {
 		logStream.flush();
+	}
+
+	private void writeLog(String msg, Throwable ex) {
+		logStream.println(msg);
+		if (ex != null) ex.printStackTrace(logStream);
 	}
 
 	private static List<FormatTerm> parseLogFormat(String fmt) {
@@ -145,7 +148,7 @@ public class LogPrinterText implements LogPrinter {
 		}
 		@Override
 		public String toString() {
-			return "FormatTerm/"+type+"="+value;
+			return "FormatTerm/"+getType()+"="+getValue();
 		}
 	}
 }

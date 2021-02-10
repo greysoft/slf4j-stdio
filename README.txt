@@ -21,9 +21,15 @@ This env var controls the format of the output logs by specifying the presence a
 This is the default format, and it represents all the available tokens, which are enclosed in braces. The rest of format string represents literal text.
 	{TIME} {LVL} TID-{TID}/{TNAME} {LNAME} {MSG}
 The token meanings are as follows:
-- TIME: ISO8601 UTC timestamp, with millisecond precision
-- LVL: The severity level of this message
+- TIME: Timestamp, with format depending on GREY_LOGGER_TIMEZONE
+- LVL: The severity level of this log message
 - TID: Thread ID
 - TNAME: Thread name
 - LNAME: The SLF4J logger name
 - MSG: The actual text of your log message
+
+- GREY_LOGGER_TIMEZONE
+This controls how the log date/time is formatted.
+If absent or set to "UTC" (not case-sensitive) log times are printed as a ISO8601 UTC timestamp, with millisecond precision.
+If set to "LOCAL" (not case-sensitive) log times are printed as a local date and time, with millisecond precision.
+Else this is assumed to be a Java timezone (ZoneId) and log times are printed as a local date and time of that timezone, with millisecond precision.

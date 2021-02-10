@@ -6,7 +6,6 @@ package com.grey.loggers.slf4j_stdio.text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.time.Instant;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,11 +20,11 @@ public class LogPrinterTextTest {
 		LogPrinterText printer = new LogPrinterText(pstrm);
 		String logname = "logname1";
 		Defs.LOGLEVEL lvl = Defs.LOGLEVEL.DEBUG;
-		long millis = Instant.now().toEpochMilli();
+		String timestamp = "time1";
 		String text = "random msg";
 		Thread thrd = Thread.currentThread();
-		String expected = Instant.ofEpochMilli(millis)+" "+lvl.name()+" TID-"+thrd.getId()+"/"+thrd.getName()+" "+logname+" "+text;
-		printer.renderLog(logname, millis, lvl, text, null);
+		String expected = timestamp+" "+lvl.name()+" TID-"+thrd.getId()+"/"+thrd.getName()+" "+logname+" "+text;
+		printer.renderLog(logname, timestamp, lvl, text, null);
 		String logmsg = bstrm.toString().trim();
 		Assert.assertEquals(expected, logmsg);
 	}
@@ -36,7 +35,7 @@ public class LogPrinterTextTest {
 		PrintStream pstrm = new PrintStream(bstrm);
 		LogPrinterText printer = new LogPrinterText(pstrm, "{MSG}");
 		String text = "random msg";
-		printer.renderLog("logname1", Instant.now().toEpochMilli(), Defs.LOGLEVEL.INFO, text, null);
+		printer.renderLog("logname1", "time1", Defs.LOGLEVEL.INFO, text, null);
 		String logmsg = bstrm.toString().trim();
 		Assert.assertEquals(text, logmsg);
 	}
@@ -45,24 +44,37 @@ public class LogPrinterTextTest {
 	public void testEscapedFormat() {
 		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
 		PrintStream pstrm = new PrintStream(bstrm);
-		String fmt = "Intro {{ {{{MSG} end";
+		String fmt = "Intro {{ {{{MSG} {{{{ end";
 		String text = "random msg";
-		String expected = "Intro { {"+text+" end";
+		String expected = "Intro { {"+text+" {{ end";
 		LogPrinterText printer = new LogPrinterText(pstrm, fmt);
-		printer.renderLog("logname1", Instant.now().toEpochMilli(), Defs.LOGLEVEL.INFO, text, null);
+		printer.renderLog("logname1", "time1", Defs.LOGLEVEL.INFO, text, null);
 		String logmsg = bstrm.toString().trim();
 		Assert.assertEquals(expected, logmsg);
 	}
 
 	// Test an escape sequence which unwittingly hides a token, but does not result in an any errors
 	@Test
-	public void testEscapedFormatWithRedundantClose() {
+	public void testEscapedToken() {
 		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
 		PrintStream pstrm = new PrintStream(bstrm);
 		String fmt = "Intro {{ {{MSG} end";
 		String expected = "Intro { {MSG} end";
 		LogPrinterText printer = new LogPrinterText(pstrm, fmt);
-		printer.renderLog("logname1", Instant.now().toEpochMilli(), Defs.LOGLEVEL.INFO, "random msg", null);
+		printer.renderLog("logname1", "time1", Defs.LOGLEVEL.INFO, "random msg", null);
+		String logmsg = bstrm.toString().trim();
+		Assert.assertEquals(expected, logmsg);
+	}
+
+	@Test
+	public void testRedundantTokenClose() {
+		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
+		PrintStream pstrm = new PrintStream(bstrm);
+		String fmt = "Intro {MSG}} }} end";
+		String text = "random msg";
+		String expected = "Intro "+text+"} }} end";
+		LogPrinterText printer = new LogPrinterText(pstrm, fmt);
+		printer.renderLog("logname1", "time1", Defs.LOGLEVEL.INFO, text, null);
 		String logmsg = bstrm.toString().trim();
 		Assert.assertEquals(expected, logmsg);
 	}
@@ -95,7 +107,7 @@ public class LogPrinterTextTest {
 		PrintStream pstrm = new PrintStream(bstrm);
 		LogPrinterText printer = new LogPrinterText(pstrm, "{msg}");
 		String text = "random msg";
-		printer.renderLog("logname1", Instant.now().toEpochMilli(), Defs.LOGLEVEL.INFO, text, null);
+		printer.renderLog("logname1", "time1", Defs.LOGLEVEL.INFO, text, null);
 		String logmsg = bstrm.toString().trim();
 		Assert.assertEquals(text, logmsg);
 	}

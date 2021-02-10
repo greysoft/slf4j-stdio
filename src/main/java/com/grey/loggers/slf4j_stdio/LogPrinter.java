@@ -5,6 +5,6 @@
 package com.grey.loggers.slf4j_stdio;
 
 public interface LogPrinter {
-	public void renderLog(String logname, long logtime, Defs.LOGLEVEL lvl, String msg, Throwable ex);
+	public void renderLog(String logname, String timestamp, Defs.LOGLEVEL lvl, String msg, Throwable ex);
 	public void flush() throws java.io.IOException;
 }

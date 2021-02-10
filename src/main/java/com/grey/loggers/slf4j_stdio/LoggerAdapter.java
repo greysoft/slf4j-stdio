@@ -6,6 +6,9 @@ package com.grey.loggers.slf4j_stdio;
 
 import java.io.PrintStream;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import com.grey.loggers.slf4j_stdio.text.LogPrinterText;
 
@@ -16,6 +19,11 @@ public class LoggerAdapter
 	private static final long serialVersionUID = 1L;
 	private static final Defs.LOGLEVEL DFLT_LEVEL = Defs.LOGLEVEL.valueOf(System.getenv().getOrDefault(Defs.ENVPREFIX+"LEVEL", Defs.LOGLEVEL.INFO.name()));
 	private static final String PRINTER_TYPE = System.getenv().getOrDefault(Defs.ENVPREFIX+"TYPE", "TEXT");
+	private static final ZoneId LOCAL_TIMEZONE = getLocalTimeZone(System.getenv().getOrDefault(Defs.ENVPREFIX+"TIMEZONE", "UTC"));
+
+	private static final StreamWrapper DefaultStream = new StreamWrapper();
+	public static PrintStream getDefaultStream() {return DefaultStream.get();}
+	public static void setDefaultStream(PrintStream ps) {DefaultStream.set(ps);}
 
 	private final Clock clock = Clock.systemUTC();
 	private final String logname;
@@ -23,14 +31,18 @@ public class LoggerAdapter
 	private final LogPrinter logPrinter;
 
 	static {
-		System.out.println(Defs.DIAGLOG_PREFIX+"Default Level="+DFLT_LEVEL);
+		System.out.println(Defs.DIAGLOG_PREFIX+"Default Level="+DFLT_LEVEL+", TimeZone="+(LOCAL_TIMEZONE==null?"UTC":LOCAL_TIMEZONE));
 	}
 
 	public LoggerAdapter(String lname, PrintStream logger, Defs.LOGLEVEL lvl) {
 		this.logname = lname;
 		this.cfglvl = (lvl == null ? DFLT_LEVEL : lvl);
-		if (logger == null) logger = System.out;
-		
+
+		if (logger == null) {
+			logger = getDefaultStream();
+			if (logger == null) logger = System.out;
+		}
+
 		if (PRINTER_TYPE.equalsIgnoreCase("text")) {
 			logPrinter = new LogPrinterText(logger);
 		} else {
@@ -170,12 +182,43 @@ public class LoggerAdapter
 
 	private void log(Defs.LOGLEVEL lvl, String s, Throwable ex) {
 		if (!isActive(lvl)) return;
-		long t = clock.millis();
-		logPrinter.renderLog(logname, t, lvl, s, ex);
+		String timestamp = getTimestamp();
+		logPrinter.renderLog(logname, timestamp, lvl, s, ex);
 	}
 
 	private void formatAndLog(Defs.LOGLEVEL lvl, String fmt, Object[] args) {
 		org.slf4j.helpers.FormattingTuple tp = org.slf4j.helpers.MessageFormatter.arrayFormat(fmt, args);
 		log(lvl, tp.getMessage(), tp.getThrowable());
+	}
+	
+	private String getTimestamp() {
+		long millis = clock.millis();
+		Instant instant = Instant.ofEpochMilli(millis);
+		if (LOCAL_TIMEZONE == null) {
+			return instant.toString();
+		}
+		ZonedDateTime dt = instant.atZone(LOCAL_TIMEZONE);
+		return dt.toLocalDate()+" "+dt.toLocalTime();
+	}
+
+	private static ZoneId getLocalTimeZone(String zone) {
+		if (zone == null | zone.isEmpty() || zone.equalsIgnoreCase("utc")) {
+			return null;
+		}
+		if (zone.equalsIgnoreCase("local")) {
+			return ZoneId.systemDefault();
+		}
+		return ZoneId.of(zone);
+	}
+
+
+	private static class StreamWrapper {
+		private PrintStream strm;
+		public synchronized PrintStream get() {
+			return strm;
+		}
+		public synchronized void set(PrintStream ps) {
+			strm = ps;
+		}
 	}
 }

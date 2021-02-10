@@ -4,25 +4,58 @@
  */
 package com.grey.yblog_slf4j;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
 import com.grey.loggers.slf4j_stdio.Defs;
 import com.grey.loggers.slf4j_stdio.LoggerAdapter;
 
 import org.junit.Test;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
+import org.junit.Before;
 import org.junit.Assert;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class LoggerAdapterTest {
+	@Before
+	public void setup() {
+		LoggerAdapter.setDefaultStream(null);
+	}
+
 	@Test
 	public void testAutoInstantiation() {
 		Logger logger = LoggerFactory.getLogger(getClass());
 		Assert.assertSame(logger.getClass(), LoggerAdapter.class);
-		logger.info("Random test message"); //sanity check, verify manually
+		//sanity checks, verify manually
+		logger.info("Random test message");
+	}
+
+	@Test
+	public void testPositionalParams() {
+		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
+		PrintStream pstrm = new PrintStream(bstrm);
+		LoggerAdapter.setDefaultStream(pstrm);
+		Logger logger = LoggerFactory.getLogger(getClass());
+
+		logger.info("Intro {} end", "p1");
+		String s = bstrm.toString().trim();
+		Assert.assertTrue(s, s.endsWith("Intro p1 end"));
+		bstrm.reset();
+
+		logger.info("Intro {} middle {} end", "p1", "p2");
+		s = bstrm.toString().trim();
+		Assert.assertTrue(s, s.endsWith("Intro p1 middle p2 end"));
+		bstrm.reset();
+
+		logger.info("Intro {} middle {} more {} end", "p1", "p2", "p3");
+		s = bstrm.toString().trim();
+		Assert.assertTrue(s, s.endsWith("Intro p1 middle p2 more p3 end"));
+		bstrm.reset();
+
+		logger.info("Intro {} middle {} more {} more2 {} end", "p1", "p2", "p3", "p4");
+		s = bstrm.toString().trim();
+		Assert.assertTrue(s, s.endsWith("Intro p1 middle p2 more p3 more2 p4 end"));
 	}
 
 	// Test the default logging level of Info
