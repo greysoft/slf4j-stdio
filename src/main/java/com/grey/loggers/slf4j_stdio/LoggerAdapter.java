@@ -6,20 +6,18 @@ package com.grey.loggers.slf4j_stdio;
 
 import java.io.PrintStream;
 import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 import com.grey.loggers.slf4j_stdio.text.LogPrinterText;
+import com.grey.loggers.slf4j_stdio.utils.TimeFormatter;
 
 public class LoggerAdapter
 	extends org.slf4j.helpers.MarkerIgnoringBase
 	implements java.io.Flushable
 {
 	private static final long serialVersionUID = 1L;
-	private static final Defs.LOGLEVEL DFLT_LEVEL = Defs.LOGLEVEL.valueOf(System.getenv().getOrDefault(Defs.ENVPREFIX+"LEVEL", Defs.LOGLEVEL.INFO.name()));
 	private static final String PRINTER_TYPE = System.getenv().getOrDefault(Defs.ENVPREFIX+"TYPE", "TEXT");
-	private static final ZoneId LOCAL_TIMEZONE = getLocalTimeZone(System.getenv().getOrDefault(Defs.ENVPREFIX+"TIMEZONE", "UTC"));
+	private static final Defs.LOGLEVEL DFLT_LEVEL = Defs.LOGLEVEL.valueOf(System.getenv().getOrDefault(Defs.ENVPREFIX+"LEVEL", Defs.LOGLEVEL.INFO.name()));
+	private static final TimeFormatter DFLT_TIMEFORMATTER = new TimeFormatter(System.getenv().getOrDefault(Defs.ENVPREFIX+"TIMEFORMAT", "UTC"));
 
 	private static final StreamWrapper DefaultStream = new StreamWrapper();
 	public static PrintStream getDefaultStream() {return DefaultStream.get();}
@@ -29,14 +27,16 @@ public class LoggerAdapter
 	private final String logname;
 	private final Defs.LOGLEVEL cfglvl;
 	private final LogPrinter logPrinter;
+	private final TimeFormatter timeFormatter;
 
 	static {
-		System.out.println(Defs.DIAGLOG_PREFIX+"Default Level="+DFLT_LEVEL+", TimeZone="+(LOCAL_TIMEZONE==null?"UTC":LOCAL_TIMEZONE));
+		System.out.println(Defs.DIAGLOG_PREFIX+"Default Level="+DFLT_LEVEL+", TimeFormat="+DFLT_TIMEFORMATTER);
 	}
 
-	public LoggerAdapter(String lname, PrintStream logger, Defs.LOGLEVEL lvl) {
+	public LoggerAdapter(String lname, PrintStream logger, Defs.LOGLEVEL lvl, TimeFormatter timeFormatter) {
 		this.logname = lname;
 		this.cfglvl = (lvl == null ? DFLT_LEVEL : lvl);
+		this.timeFormatter = (timeFormatter == null ? DFLT_TIMEFORMATTER : timeFormatter);
 
 		if (logger == null) {
 			logger = getDefaultStream();
@@ -51,7 +51,7 @@ public class LoggerAdapter
 	}
 
 	public LoggerAdapter(String lname) {
-		this(lname, null, null);
+		this(lname, null, null, null);
 	}
 
 	private boolean isActive(Defs.LOGLEVEL lvl) {return cfglvl.ordinal() >= lvl.ordinal();}
@@ -182,33 +182,13 @@ public class LoggerAdapter
 
 	private void log(Defs.LOGLEVEL lvl, String s, Throwable ex) {
 		if (!isActive(lvl)) return;
-		String timestamp = getTimestamp();
+		String timestamp = timeFormatter.getTime(clock);
 		logPrinter.renderLog(logname, timestamp, lvl, s, ex);
 	}
 
 	private void formatAndLog(Defs.LOGLEVEL lvl, String fmt, Object[] args) {
 		org.slf4j.helpers.FormattingTuple tp = org.slf4j.helpers.MessageFormatter.arrayFormat(fmt, args);
 		log(lvl, tp.getMessage(), tp.getThrowable());
-	}
-	
-	private String getTimestamp() {
-		long millis = clock.millis();
-		Instant instant = Instant.ofEpochMilli(millis);
-		if (LOCAL_TIMEZONE == null) {
-			return instant.toString();
-		}
-		ZonedDateTime dt = instant.atZone(LOCAL_TIMEZONE);
-		return dt.toLocalDate()+" "+dt.toLocalTime();
-	}
-
-	private static ZoneId getLocalTimeZone(String zone) {
-		if (zone == null | zone.isEmpty() || zone.equalsIgnoreCase("utc")) {
-			return null;
-		}
-		if (zone.equalsIgnoreCase("local")) {
-			return ZoneId.systemDefault();
-		}
-		return ZoneId.of(zone);
 	}
 
 

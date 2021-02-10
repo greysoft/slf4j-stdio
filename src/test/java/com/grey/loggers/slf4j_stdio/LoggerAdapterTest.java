@@ -2,7 +2,7 @@
  * Copyright 2014-2021 Yusef Badri - All rights reserved.
  * grey-slf4j-stdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
  */
-package com.grey.yblog_slf4j;
+package com.grey.loggers.slf4j_stdio;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -63,7 +63,7 @@ public class LoggerAdapterTest {
 	public void testLevelInfo() {
 		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
 		PrintStream pstrm = new PrintStream(bstrm);
-		LoggerAdapter logger = new LoggerAdapter("testLevels", pstrm, Defs.LOGLEVEL.INFO);
+		LoggerAdapter logger = new LoggerAdapter("testLevels", pstrm, Defs.LOGLEVEL.INFO, null);
 		Assert.assertTrue(logger.isErrorEnabled());
 		Assert.assertTrue(logger.isWarnEnabled());
 		Assert.assertTrue(logger.isInfoEnabled());
@@ -92,7 +92,7 @@ public class LoggerAdapterTest {
 	public void testLevelError() {
 		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
 		PrintStream pstrm = new PrintStream(bstrm);
-		LoggerAdapter logger = new LoggerAdapter("testLevelDebug", pstrm, Defs.LOGLEVEL.ERROR);
+		LoggerAdapter logger = new LoggerAdapter("testLevelDebug", pstrm, Defs.LOGLEVEL.ERROR, null);
 		Assert.assertTrue(logger.isErrorEnabled());
 		Assert.assertFalse(logger.isWarnEnabled());
 		Assert.assertFalse(logger.isInfoEnabled());
@@ -115,7 +115,7 @@ public class LoggerAdapterTest {
 	public void testLevelWarn() {
 		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
 		PrintStream pstrm = new PrintStream(bstrm);
-		LoggerAdapter logger = new LoggerAdapter("testLevelDebug", pstrm, Defs.LOGLEVEL.WARN);
+		LoggerAdapter logger = new LoggerAdapter("testLevelDebug", pstrm, Defs.LOGLEVEL.WARN, null);
 		Assert.assertTrue(logger.isErrorEnabled());
 		Assert.assertTrue(logger.isWarnEnabled());
 		Assert.assertFalse(logger.isInfoEnabled());
@@ -144,7 +144,7 @@ public class LoggerAdapterTest {
 	public void testLevelDebug() {
 		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
 		PrintStream pstrm = new PrintStream(bstrm);
-		LoggerAdapter logger = new LoggerAdapter("testLevelDebug", pstrm, Defs.LOGLEVEL.DEBUG);
+		LoggerAdapter logger = new LoggerAdapter("testLevelDebug", pstrm, Defs.LOGLEVEL.DEBUG, null);
 		Assert.assertTrue(logger.isErrorEnabled());
 		Assert.assertTrue(logger.isWarnEnabled());
 		Assert.assertTrue(logger.isInfoEnabled());
@@ -167,7 +167,7 @@ public class LoggerAdapterTest {
 	public void testLevelTrace() {
 		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
 		PrintStream pstrm = new PrintStream(bstrm);
-		LoggerAdapter logger = new LoggerAdapter("testLevelTrace", pstrm, Defs.LOGLEVEL.TRACE);
+		LoggerAdapter logger = new LoggerAdapter("testLevelTrace", pstrm, Defs.LOGLEVEL.TRACE, null);
 		Assert.assertTrue(logger.isErrorEnabled());
 		Assert.assertTrue(logger.isWarnEnabled());
 		Assert.assertTrue(logger.isInfoEnabled());
@@ -189,7 +189,7 @@ public class LoggerAdapterTest {
 	public void testLoggingOff() {
 		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
 		PrintStream pstrm = new PrintStream(bstrm);
-		LoggerAdapter logger = new LoggerAdapter("testLevelOff", pstrm, Defs.LOGLEVEL.OFF);
+		LoggerAdapter logger = new LoggerAdapter("testLevelOff", pstrm, Defs.LOGLEVEL.OFF, null);
 		Assert.assertFalse(logger.isErrorEnabled());
 		Assert.assertFalse(logger.isWarnEnabled());
 		Assert.assertFalse(logger.isInfoEnabled());

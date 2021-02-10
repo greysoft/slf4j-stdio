@@ -28,8 +28,9 @@ The token meanings are as follows:
 - LNAME: The SLF4J logger name
 - MSG: The actual text of your log message
 
-- GREY_LOGGER_TIMEZONE
+- GREY_LOGGER_TIMEFORMAT
 This controls how the log date/time is formatted.
-If absent or set to "UTC" (not case-sensitive) log times are printed as a ISO8601 UTC timestamp, with millisecond precision.
+If absent or set to "UTC" (not case-sensitive) log times are printed as an ISO8601 UTC timestamp, with millisecond precision.
 If set to "LOCAL" (not case-sensitive) log times are printed as a local date and time, with millisecond precision.
-Else this is assumed to be a Java timezone (ZoneId) and log times are printed as a local date and time of that timezone, with millisecond precision.
+If set to "milliseconds" or "seconds" (not case-sensitive) log times are printed as the epoch milliseconds or seconds respectively.
+Else this is assumed to be a timezone (case-sensitive Java ZoneId) and log times are printed as a local date and time of that timezone, with millisecond precision.
