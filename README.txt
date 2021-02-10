@@ -1,4 +1,4 @@
-slf4j-stdio is a logging framework, and more specifically it is an SLF4J adapter library.
+slf4j-stdio is a logging framework that prints all logs to standard-output (ie. the console) and more specifically it is an SLF4J adapter library.
 That means you do no call slf4j-stdio directly, but so long as you have it on your classpath, any logging calls to the SLF4J facade will get transparently routed to slf4j-stdio.
 
 So why do we need yet another SLF4J-based logger?
@@ -6,6 +6,8 @@ So why do we need yet another SLF4J-based logger?
 1) slf4j-stdio does not require any configuration files, and is entirely driven from the environment, which makes it easier to control.
 
 2) slf4j-stdio allows you to log thread IDs, something which the other frameworks resolutely refuse to, and which can be invaluable for debugging multi-threaded applications, ie. just about any modern real-world application.
+
+3) slf4j-stdio allows you to output the logs in JSON format, if you like that sort of thing.
 
 Configuration
 --------------
@@ -34,3 +36,8 @@ If absent or set to "UTC" (not case-sensitive) log times are printed as an ISO86
 If set to "LOCAL" (not case-sensitive) log times are printed as a local date and time, with millisecond precision.
 If set to "milliseconds" or "seconds" (not case-sensitive) log times are printed as the epoch milliseconds or seconds respectively.
 Else this is assumed to be a timezone (case-sensitive Java ZoneId) and log times are printed as a local date and time of that timezone, with millisecond precision.
+
+- GREY_LOGGER_TYPE
+This controls the type of output.
+If absent or set to "TEXT", we will output standard textual logs, one per line.
+If set to "JSON", the logs will be in JSON form, ie. each log will be a JSON object, with attributes for the timestamp, serverity level, message, etc.

@@ -1,4 +1,8 @@
-// Need to explicitly run jacocoTestReport task to generate HTML report, but
+/*
+ * Copyright 2014-2021 Yusef Badri - All rights reserved.
+ * grey-slf4j-stdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
+ */
+// NB: Need to explicitly run jacocoTestReport task to generate HTML report, but
 // test.exec is automatically created by a build. The HTML report is created
 // from the test.exec file.
 plugins {
@@ -18,6 +22,7 @@ allprojects {
 
 dependencies {
 	api "org.slf4j:slf4j-api:$versionSLF4J"
+	implementation "com.fasterxml.jackson.core:jackson-databind:$versionJackson"
 
 	testImplementation "junit:junit:$versionJUNIT"
 	testImplementation "org.mockito:mockito-core:$versionMockito"

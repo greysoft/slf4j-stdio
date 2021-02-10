@@ -41,7 +41,7 @@ public class LogPrinterText implements LogPrinter {
 	}
 
 	@Override
-	public void renderLog(String logname, String timestamp, Defs.LOGLEVEL lvl, String msg, Throwable ex) {
+	public void renderLog(String logname, String timestamp, Defs.LOGLEVEL lvl, String msg, Throwable error) {
 		Thread thrd = Thread.currentThread();
 		StringBuilder sb = new StringBuilder();
 
@@ -74,7 +74,7 @@ public class LogPrinterText implements LogPrinter {
 			}
 			sb.append(txt);
 		}
-		writeLog(sb.toString(), ex);
+		writeLog(sb.toString(), error);
 	}
 
 	@Override

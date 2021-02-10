@@ -7,6 +7,7 @@ package com.grey.loggers.slf4j_stdio;
 import java.io.PrintStream;
 import java.time.Clock;
 
+import com.grey.loggers.slf4j_stdio.json.LogPrinterJson;
 import com.grey.loggers.slf4j_stdio.text.LogPrinterText;
 import com.grey.loggers.slf4j_stdio.utils.TimeFormatter;
 
@@ -45,6 +46,8 @@ public class LoggerAdapter
 
 		if (PRINTER_TYPE.equalsIgnoreCase("text")) {
 			logPrinter = new LogPrinterText(logger);
+		} else if (PRINTER_TYPE.equalsIgnoreCase("json")) {
+			logPrinter = new LogPrinterJson(logger);
 		} else {
 			throw new IllegalArgumentException("Invalid Printer type: "+Defs.ENVPREFIX+"TYPE"+"="+PRINTER_TYPE);
 		}

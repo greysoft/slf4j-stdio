@@ -41,6 +41,20 @@ public class LogPrinterTextTest {
 	}
 
 	@Test
+	public void testException() {
+		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
+		PrintStream pstrm = new PrintStream(bstrm);
+		LogPrinterText printer = new LogPrinterText(pstrm, "{MSG}");
+		String text = "random msg";
+		Exception error = new java.io.IOException("Simulated exception");
+		printer.renderLog("logname1", "time1", Defs.LOGLEVEL.INFO, text, error);
+		String logmsg = bstrm.toString().trim();
+		Assert.assertTrue(text, logmsg.startsWith(text));
+		Assert.assertTrue(text, logmsg.contains("java.io.IOException: Simulated exception"));
+		Assert.assertTrue(text, logmsg.contains("at "+getClass().getName()+".testException"));
+	}
+
+	@Test
 	public void testEscapedFormat() {
 		ByteArrayOutputStream bstrm = new ByteArrayOutputStream();
 		PrintStream pstrm = new PrintStream(bstrm);
