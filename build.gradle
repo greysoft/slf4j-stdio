@@ -1,15 +1,27 @@
 /*
  * Copyright 2014-2021 Yusef Badri - All rights reserved.
- * grey-slf4j-stdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
+ * grey-slf4j-logstdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
  */
-// NB: Need to explicitly run jacocoTestReport task to generate HTML report, but
-// test.exec is automatically created by a build. The HTML report is created
-// from the test.exec file.
+// To build without signing:
+//     ./gradlew build -x signArchives
+// To upload to Sonatype staging for Maven Central deployment:
+//      ossrh_username=myname1 ossrh_password=mypass1 ./gradlew -PbuildVersion=0.0.1 -Psigning.gnupg.keyName=long_key_id -Psigning.gnupg.passphrase="blah blah" clean build uploadArchives
+// Older versions of signing plugin were based on GnuPG2 and required:
+// -Psigning.keyId=mykeyid1 -Psigning.password=mykeypass1 -Psigning.secretKeyRingFile=myringpath
+//
+// jacocoTestReport task generates HTML report from test.exec binary, which
+// is automatically created by the ordinary build task.
+
 plugins {
 	id 'java-library'
+	id 'maven'
+	id 'signing'
 	id 'jacoco'
 	id 'eclipse'
 }
+
+def ossrhUsername = System.getenv("ossrh_username")
+def ossrhPassword = System.getenv("ossrh_password")
 
 repositories {
 	jcenter()
@@ -26,4 +38,61 @@ dependencies {
 
 	testImplementation "junit:junit:$versionJUNIT"
 	testImplementation "org.mockito:mockito-core:$versionMockito"
+}
+
+java {
+	withSourcesJar()
+	withJavadocJar()
+}
+
+artifacts {
+	archives javadocJar, sourcesJar
+}
+
+signing {
+	useGpgCmd() //use GnuPG 2
+	sign configurations.archives
+}
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+				authentication(userName: ossrhUsername, password: ossrhPassword)
+			}
+
+			snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+				authentication(userName: ossrhUsername, password: ossrhPassword)
+			}
+
+			pom.project {
+				name 'grey-slf4j-logstdio'
+				packaging 'jar'
+				description 'SLF4J logger with environment-driven config'
+				url 'https://github.com/greysoft/slf4j-stdio'
+
+				scm {
+					connection 'scm:git:git://github.com/greysoft/slf4-stdio.git'
+					developerConnection 'scm:git:ssh://github.com/greysoft/slf4-stdio.git'
+					url 'https://github.com/greysoft/slf4j-stdio'
+				}
+
+				licenses {
+					license {
+						name 'GNU Affero General Public License v3.0'
+						url 'https://www.gnu.org/licenses/agpl-3.0.en.html'
+					}
+				}
+
+				developers {
+					developer {
+						id 'mavenyb'
+						name 'Yusef Badri'
+					}
+				}
+			}
+		}
+	}
 }

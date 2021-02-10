@@ -1,17 +1,17 @@
-slf4j-stdio is a logging framework that prints all logs to standard-output (ie. the console) and more specifically it is an SLF4J adapter library.
-That means you do no call slf4j-stdio directly, but so long as you have it on your classpath, any logging calls to the SLF4J facade will get transparently routed to slf4j-stdio.
+slf4j-logstdio is a logging framework that prints all logs to standard-output (ie. the console) and more specifically it is an SLF4J adapter library.
+That means you do not call slf4j-logstdio directly, but so long as you have it on your classpath, any logging calls to the SLF4J facade will get transparently routed to slf4j-logstdio.
 
 So why do we need yet another SLF4J-based logger?
 
-1) slf4j-stdio does not require any configuration files, and is entirely driven from the environment, which makes it easier to control.
+1) slf4j-logstdio does not require any configuration files, and is entirely driven from the environment, which can make it easier to control.
 
-2) slf4j-stdio allows you to log thread IDs, something which the other frameworks resolutely refuse to, and which can be invaluable for debugging multi-threaded applications, ie. just about any modern real-world application.
+2) slf4j-logstdio allows you to log thread IDs, something which the other frameworks resolutely refuse to, and which can be invaluable for debugging multi-threaded applications, ie. just about any modern real-world application.
 
-3) slf4j-stdio allows you to output the logs in JSON format, if you like that sort of thing.
+3) slf4j-logstdio allows you to output the logs in JSON format, if you like that sort of thing.
 
 Configuration
 --------------
-slf4j-stdio is configured by the following environment variables.
+slf4j-logstdio is configured via the following environment variables.
 
 - GREY_LOGGER_LEVEL:
 This env var represents the minimum severity of logs to print, and can take any of the following values, to set the appropriate SLF4J logging filter, eg. a level of INFO means DEBUG logs will not be printed.

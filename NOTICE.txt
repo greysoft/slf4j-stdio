@@ -1,3 +1,3 @@
-grey-slf4j-stdio
+grey-slf4j-logstdio
 Copyright (C) 2014-2021 Yusef Badri  <yb a.t greyware d.o.t co d.o.t uk>
-grey-slf4j-stdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
+grey-slf4j-logstdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
