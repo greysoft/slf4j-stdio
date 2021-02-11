@@ -9,6 +9,18 @@ So why do we need yet another SLF4J-based logger?
 
 3) slf4j-logstdio allows you to output the logs in JSON format, if you like that sort of thing.
 
+Build
+-------
+To link slf4j-logstdio into your application, add this Maven dependency to your build:
+	<dependency>
+		<groupId>com.github.greysoft.loggers</groupId>
+		<artifactId>slf4j-logstdio</artifactId>
+		<version>1.0.0</version>
+	</dependency>
+
+The above would literally go in a Maven POM, while the Gradle equivalent is:
+	compile group: 'com.github.greysoft.loggers', name: 'slf4j-stdio', version: '1.0.0'
+
 Configuration
 --------------
 slf4j-logstdio is configured via the following environment variables.

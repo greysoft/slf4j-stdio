@@ -2,12 +2,15 @@
  * Copyright 2014-2021 Yusef Badri - All rights reserved.
  * grey-slf4j-logstdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
  */
-// To build without signing:
-//     ./gradlew build -x signArchives
 // To upload to Sonatype staging for Maven Central deployment:
-//      ossrh_username=myname1 ossrh_password=mypass1 ./gradlew -PbuildVersion=0.0.1 -Psigning.gnupg.keyName=long_key_id -Psigning.gnupg.passphrase="blah blah" clean build uploadArchives
+//     ./gradlew -PbuildVersion=0.0.1 -PossrhUsername=myname -PossrhPassword=mypass -Psigning.gnupg.keyName=key_id -Psigning.gnupg.passphrase="blah blah" build uploadArchives
 // Older versions of signing plugin were based on GnuPG2 and required:
-// -Psigning.keyId=mykeyid1 -Psigning.password=mykeypass1 -Psigning.secretKeyRingFile=myringpath
+//     -Psigning.keyId=mykeyid1 -Psigning.password=mykeypass1 -Psigning.secretKeyRingFile=myringpath
+// Note that all these properties can go in settings.gradle instead, or in
+// $HOME/.gradle/gradle.properties if we want to keep them out of Git.
+//
+// Can explicitly disable signing with: ./gradlew build -x signArchives
+// Clear PGP passphrase on Ubuntu: gpg-connect-agent reloadagent /bye
 //
 // jacocoTestReport task generates HTML report from test.exec binary, which
 // is automatically created by the ordinary build task.
@@ -19,9 +22,6 @@ plugins {
 	id 'jacoco'
 	id 'eclipse'
 }
-
-def ossrhUsername = System.getenv("ossrh_username")
-def ossrhPassword = System.getenv("ossrh_password")
 
 repositories {
 	jcenter()
@@ -40,6 +40,12 @@ dependencies {
 	testImplementation "org.mockito:mockito-core:$versionMockito"
 }
 
+if (!project.hasProperty("ossrhUsername")) {
+	ext.ossrhUsername = ''
+	ext.ossrhPassword = ''
+}
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
 java {
 	withSourcesJar()
 	withJavadocJar()
@@ -52,6 +58,10 @@ artifacts {
 signing {
 	useGpgCmd() //use GnuPG 2
 	sign configurations.archives
+}
+
+tasks.withType(Sign) {
+	onlyIf { isReleaseVersion }
 }
 
 uploadArchives {
