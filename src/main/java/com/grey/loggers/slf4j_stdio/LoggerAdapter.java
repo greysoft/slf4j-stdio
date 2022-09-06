@@ -21,12 +21,13 @@ public class LoggerAdapter
 	private static final Defs.LOGLEVEL DFLT_LEVEL = Defs.LOGLEVEL.valueOf(System.getenv().getOrDefault(Defs.ENVPREFIX+"LEVEL", Defs.LOGLEVEL.INFO.name()));
 	private static final TimeFormatter DFLT_TIMEFORMATTER = new TimeFormatter(System.getenv().getOrDefault(Defs.ENVPREFIX+"TIMEFORMAT", "UTC"));
 
+	private static final LogPrinter DEFAULT_LOGWRITER = createLogWriter(System.out);
+
 	private static final StreamWrapper DefaultStream = new StreamWrapper();
 	public static PrintStream getDefaultStream() {return DefaultStream.get();}
 	public static void setDefaultStream(PrintStream ps) {DefaultStream.set(ps);}
 
 	private final Clock clock = Clock.systemUTC();
-	private final String logname;
 	private final Defs.LOGLEVEL cfglvl;
 	private final LogPrinter logPrinter;
 	private final TimeFormatter timeFormatter;
@@ -35,22 +36,20 @@ public class LoggerAdapter
 		System.out.println(Defs.DIAGLOG_PREFIX+"Default Level="+DFLT_LEVEL+", TimeFormat="+DFLT_TIMEFORMATTER);
 	}
 
-	public LoggerAdapter(String lname, PrintStream logger, Defs.LOGLEVEL lvl, TimeFormatter timeFormatter) {
-		this.logname = lname;
+	public LoggerAdapter(String lname, PrintStream strm, Defs.LOGLEVEL lvl, TimeFormatter timeFormatter) {
+		this.name = lname;
 		this.cfglvl = (lvl == null ? DFLT_LEVEL : lvl);
 		this.timeFormatter = (timeFormatter == null ? DFLT_TIMEFORMATTER : timeFormatter);
 
-		if (logger == null) {
-			logger = getDefaultStream();
-			if (logger == null) logger = System.out;
+		if (strm == null) {
+			strm = getDefaultStream();
+			if (strm == null) strm = System.out;
 		}
 
-		if (PRINTER_TYPE.equalsIgnoreCase("text")) {
-			logPrinter = new LogPrinterText(logger);
-		} else if (PRINTER_TYPE.equalsIgnoreCase("json")) {
-			logPrinter = new LogPrinterJson(logger);
+		if (strm == System.out) {
+			logPrinter = DEFAULT_LOGWRITER;
 		} else {
-			throw new IllegalArgumentException("Invalid Printer type: "+Defs.ENVPREFIX+"TYPE"+"="+PRINTER_TYPE);
+			logPrinter = createLogWriter(strm);
 		}
 	}
 
@@ -58,13 +57,10 @@ public class LoggerAdapter
 		this(lname, null, null, null);
 	}
 
-	private boolean isActive(Defs.LOGLEVEL lvl) {return cfglvl.ordinal() >= lvl.ordinal();}
-
-	@Override
-	public String getName() {return logname;}
-
 	@Override
 	protected String getFullyQualifiedCallerName() {return null;}
+
+	private boolean isActive(Defs.LOGLEVEL lvl) {return cfglvl.ordinal() >= lvl.ordinal();}
 
 	@Override
 	public boolean isTraceEnabled() {return isActive(Defs.LOGLEVEL.TRACE);}
@@ -93,7 +89,7 @@ public class LoggerAdapter
 		}
 		org.slf4j.helpers.FormattingTuple tp = org.slf4j.helpers.MessageFormatter.arrayFormat(msg, args);
 		String timestamp = timeFormatter.getTime(clock);
-		logPrinter.renderLog(logname, timestamp, lvl, tp.getMessage(), tp.getThrowable());
+		logPrinter.renderLog(getName(), timestamp, lvl, tp.getMessage(), tp.getThrowable());
 	}
 
 	private static Defs.LOGLEVEL mapSlf4jLogLevel(org.slf4j.event.Level lvl) {
@@ -110,6 +106,16 @@ public class LoggerAdapter
 			return Defs.LOGLEVEL.TRACE;
 		default:
 			return Defs.LOGLEVEL.ERROR;
+		}
+	}
+
+	private static LogPrinter createLogWriter(PrintStream strm) {
+		if (PRINTER_TYPE.equalsIgnoreCase("text")) {
+			return new LogPrinterText(strm);
+		} else if (PRINTER_TYPE.equalsIgnoreCase("json")) {
+			return new LogPrinterJson(strm);
+		} else {
+			throw new IllegalArgumentException("Invalid Printer type: "+Defs.ENVPREFIX+"TYPE"+"="+PRINTER_TYPE);
 		}
 	}
 

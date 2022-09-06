@@ -24,8 +24,15 @@ public class LoggerAdapterTest {
 	public void testAutoInstantiation() {
 		Logger logger = LoggerFactory.getLogger(getClass());
 		Assert.assertSame(logger.getClass(), LoggerAdapter.class);
-		//sanity checks, verify manually
-		logger.info("Random test message");
+		Logger logger2 = LoggerFactory.getLogger(getClass());
+		Assert.assertSame(logger2.getClass(), LoggerAdapter.class);
+		logger2 = LoggerFactory.getLogger("AnotherLogger");
+		Assert.assertSame(logger2.getClass(), LoggerAdapter.class);
+		Assert.assertNotSame(logger2, logger);
+		//we just verify the output manually here
+		logger.info("Random test message 1 from logger1 - param={}", "p1");
+		logger2.info("Random test message 1 from logger2 - param={}", "p2");
+		logger.info("Random test message 2 from logger1 - param={}", "p3", new Exception("Dummy Exception"));
 	}
 
 	@Test
