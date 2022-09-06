@@ -1,18 +1,19 @@
 /*
- * Copyright 2014-2021 Yusef Badri - All rights reserved.
+ * Copyright 2014-2022 Yusef Badri - All rights reserved.
  * grey-slf4j-logstdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
  */
 package com.grey.loggers.slf4j_stdio;
 
 import java.io.PrintStream;
 import java.time.Clock;
+import java.util.Arrays;
 
 import com.grey.loggers.slf4j_stdio.json.LogPrinterJson;
 import com.grey.loggers.slf4j_stdio.text.LogPrinterText;
 import com.grey.loggers.slf4j_stdio.utils.TimeFormatter;
 
 public class LoggerAdapter
-	extends org.slf4j.helpers.MarkerIgnoringBase
+	extends org.slf4j.helpers.LegacyAbstractLogger
 	implements java.io.Flushable
 {
 	private static final long serialVersionUID = 1L;
@@ -63,6 +64,9 @@ public class LoggerAdapter
 	public String getName() {return logname;}
 
 	@Override
+	protected String getFullyQualifiedCallerName() {return null;}
+
+	@Override
 	public boolean isTraceEnabled() {return isActive(Defs.LOGLEVEL.TRACE);}
 	@Override
 	public boolean isDebugEnabled() {return isActive(Defs.LOGLEVEL.DEBUG);}
@@ -74,124 +78,39 @@ public class LoggerAdapter
 	public boolean isErrorEnabled() {return isActive(Defs.LOGLEVEL.ERROR);}
 
 	@Override
-	public void trace(String msg) {
-		trace(msg, (Throwable)null);
-	}
-	@Override
-	public void trace(String msg, Throwable ex) {
-		log(Defs.LOGLEVEL.TRACE, msg, ex);
-	}
-	@Override
-	public void trace(String fmt, Object arg) {
-		trace(fmt, arg, null);
-	}
-	@Override
-	public void trace(String fmt, Object arg1, Object arg2) {
-		trace(fmt, arg1, arg2, null);
-	}
-	@Override
-	public void trace(String fmt, Object... args) {
-		formatAndLog(Defs.LOGLEVEL.TRACE, fmt, args);
-	}
-
-	@Override
-	public void debug(String msg) {
-		debug(msg, (Throwable)null);
-	}
-	@Override
-	public void debug(String msg, Throwable ex) {
-		log(Defs.LOGLEVEL.DEBUG, msg, ex);
-	}
-	@Override
-	public void debug(String fmt, Object arg) {
-		debug(fmt, arg, null);
-	}
-	@Override
-	public void debug(String fmt, Object arg1, Object arg2) {
-		debug(fmt, arg1, arg2, null);
-	}
-	@Override
-	public void debug(String fmt, Object... args) {
-		formatAndLog(Defs.LOGLEVEL.DEBUG, fmt, args);
-	}
-
-	@Override
-	public void info(String msg) {
-		info(msg, (Throwable)null);
-	}
-	@Override
-	public void info(String msg, Throwable ex) {
-		log(Defs.LOGLEVEL.INFO, msg, ex);
-	}
-	@Override
-	public void info(String fmt, Object arg) {
-		info(fmt, arg, null);
-	}
-	@Override
-	public void info(String fmt, Object arg1, Object arg2) {
-		info(fmt, arg1, arg2, null);
-	}
-	@Override
-	public void info(String fmt, Object... args) {
-		formatAndLog(Defs.LOGLEVEL.INFO, fmt, args);
-	}
-
-	@Override
-	public void warn(String msg) {
-		warn(msg, (Throwable)null);
-	}
-	@Override
-	public void warn(String msg, Throwable ex) {
-		log(Defs.LOGLEVEL.WARN, msg, ex);
-	}
-	@Override
-	public void warn(String fmt, Object arg) {
-		warn(fmt, arg, null);
-	}
-	@Override
-	public void warn(String fmt, Object arg1, Object arg2) {
-		warn(fmt, arg1, arg2, null);
-	}
-	@Override
-	public void warn(String fmt, Object... args) {
-		formatAndLog(Defs.LOGLEVEL.WARN, fmt, args);
-	}
-
-	@Override
-	public void error(String msg) {
-		error(msg, (Throwable)null);
-	}
-	@Override
-	public void error(String msg, Throwable ex) {
-		log(Defs.LOGLEVEL.ERROR, msg, ex);
-	}
-	@Override
-	public void error(String fmt, Object arg) {
-		error(fmt, arg, null);
-	}
-	@Override
-	public void error(String fmt, Object arg1, Object arg2) {
-		error(fmt, arg1, arg2, null);
-	}
-	@Override
-	public void error(String fmt, Object... args) {
-		formatAndLog(Defs.LOGLEVEL.ERROR, fmt, args);
-	}
-
-	@Override
 	public void flush() throws java.io.IOException {
 		logPrinter.flush();
 	}
 
-	private void log(Defs.LOGLEVEL lvl, String s, Throwable ex) {
+	@Override
+	protected void handleNormalizedLoggingCall(org.slf4j.event.Level slf4jLevel, org.slf4j.Marker marker, String msg, Object[] args, Throwable throwable) {
+		Defs.LOGLEVEL lvl = mapSlf4jLogLevel(slf4jLevel);
 		if (!isActive(lvl)) return;
+
+		if (throwable != null) {
+			args = Arrays.copyOf(args, args.length+1);
+			args[args.length - 1] = throwable;
+		}
+		org.slf4j.helpers.FormattingTuple tp = org.slf4j.helpers.MessageFormatter.arrayFormat(msg, args);
 		String timestamp = timeFormatter.getTime(clock);
-		logPrinter.renderLog(logname, timestamp, lvl, s, ex);
+		logPrinter.renderLog(logname, timestamp, lvl, tp.getMessage(), tp.getThrowable());
 	}
 
-	private void formatAndLog(Defs.LOGLEVEL lvl, String fmt, Object[] args) {
-		org.slf4j.helpers.FormattingTuple tp = org.slf4j.helpers.MessageFormatter.arrayFormat(fmt, args);
-		log(lvl, tp.getMessage(), tp.getThrowable());
+	private static Defs.LOGLEVEL mapSlf4jLogLevel(org.slf4j.event.Level lvl) {
+		switch (lvl) {
+		case ERROR:
+			return Defs.LOGLEVEL.ERROR;
+		case WARN:
+			return Defs.LOGLEVEL.WARN;
+		case INFO:
+			return Defs.LOGLEVEL.INFO;
+		case DEBUG:
+			return Defs.LOGLEVEL.DEBUG;
+		case TRACE:
+			return Defs.LOGLEVEL.TRACE;
+		default:
+			return Defs.LOGLEVEL.ERROR;
+		}
 	}
 
 

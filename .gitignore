@@ -2,8 +2,8 @@
 /build/
 
 .settings/
-bin/
 .project
 .classpath
+bin/
 
-**/target/
+.idea/

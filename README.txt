@@ -5,7 +5,7 @@ So why do we need yet another SLF4J-based logger?
 
 1) slf4j-logstdio does not require any configuration files, and is entirely driven from the environment, which can make it easier to control.
 
-2) slf4j-logstdio allows you to log thread IDs, something which the other frameworks resolutely refuse to, and which can be invaluable for debugging multi-threaded applications, ie. just about any modern real-world application.
+2) slf4j-logstdio allows you to log thread IDs, something which the other frameworks resolutely refuse to do, and which can be invaluable for debugging multi-threaded applications, ie. just about any modern real-world application.
 
 3) slf4j-logstdio allows you to output the logs in JSON format, if you like that sort of thing.
 
@@ -19,7 +19,7 @@ To link slf4j-logstdio into your application, add this Maven dependency to your 
 	</dependency>
 
 The above would literally go in a Maven POM, while the Gradle equivalent is:
-	compile group: 'com.github.greysoft.loggers', name: 'slf4j-stdio', version: '1.0.0'
+	implementation "com.github.greysoft.loggers:slf4j-logstdio:1.0.0"
 
 Configuration
 --------------

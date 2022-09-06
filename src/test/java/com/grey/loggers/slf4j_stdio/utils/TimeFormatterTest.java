@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2021 Yusef Badri - All rights reserved.
+ * Copyright 2014-2022 Yusef Badri - All rights reserved.
  * grey-slf4j-logstdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
  */
 package com.grey.loggers.slf4j_stdio.utils;
@@ -10,8 +10,6 @@ import java.time.ZoneId;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import com.grey.loggers.slf4j_stdio.utils.TimeFormatter;
 
 public class TimeFormatterTest {
 	private static final long TIME1 = 1608562414887L; //Dec 21st 2020, 14:53 GMT
