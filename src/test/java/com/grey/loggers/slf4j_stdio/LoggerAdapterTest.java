@@ -22,17 +22,22 @@ public class LoggerAdapterTest {
 
 	@Test
 	public void testAutoInstantiation() {
-		Logger logger = LoggerFactory.getLogger(getClass());
-		Assert.assertSame(logger.getClass(), LoggerAdapter.class);
-		Logger logger2 = LoggerFactory.getLogger(getClass());
-		Assert.assertSame(logger2.getClass(), LoggerAdapter.class);
-		logger2 = LoggerFactory.getLogger("AnotherLogger");
-		Assert.assertSame(logger2.getClass(), LoggerAdapter.class);
-		Assert.assertNotSame(logger2, logger);
+		Logger log = LoggerFactory.getLogger(getClass());
+		Assert.assertSame(log.getClass(), LoggerAdapter.class);
+		Logger log2 = LoggerFactory.getLogger(getClass());
+		Assert.assertSame(log2.getClass(), LoggerAdapter.class);
+		log2 = LoggerFactory.getLogger("AnotherLogger");
+		Assert.assertSame(log2.getClass(), LoggerAdapter.class);
+		Assert.assertNotSame(log2, log);
+
 		//we just verify the output manually here
-		logger.info("Random test message 1 from logger1 - param={}", "p1");
-		logger2.info("Random test message 1 from logger2 - param={}", "p2");
-		logger.info("Random test message 2 from logger1 - param={}", "p3", new Exception("Dummy Exception"));
+		log.debug("Test debug msg"); //shouldn't come out
+		log.info("Test msg");
+		log2.info("Test msg from logger2");
+		log.warn("Test msg with param1={}", "val1");
+		log.info("Test msg with param1={}, param2={}", "val1", "val2");
+		log.error("Test msg with param1={}, param2={}, param3={}", "val1", "val2", "val3");
+		log.info("Test msg with param1={} and Throwable", "val1", new Exception("Dumy Exception"));
 	}
 
 	@Test

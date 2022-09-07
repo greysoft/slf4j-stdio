@@ -6,7 +6,6 @@ package com.grey.loggers.slf4j_stdio;
 
 import java.io.PrintStream;
 import java.time.Clock;
-import java.util.Arrays;
 
 import com.grey.loggers.slf4j_stdio.json.LogPrinterJson;
 import com.grey.loggers.slf4j_stdio.text.LogPrinterText;
@@ -79,17 +78,12 @@ public class LoggerAdapter
 	}
 
 	@Override
-	protected void handleNormalizedLoggingCall(org.slf4j.event.Level slf4jLevel, org.slf4j.Marker marker, String msg, Object[] args, Throwable throwable) {
+	protected void handleNormalizedLoggingCall(org.slf4j.event.Level slf4jLevel, org.slf4j.Marker marker, String fmt, Object[] args, Throwable ex) {
 		Defs.LOGLEVEL lvl = mapSlf4jLogLevel(slf4jLevel);
 		if (!isActive(lvl)) return;
-
-		if (throwable != null) {
-			args = Arrays.copyOf(args, args.length+1);
-			args[args.length - 1] = throwable;
-		}
-		org.slf4j.helpers.FormattingTuple tp = org.slf4j.helpers.MessageFormatter.arrayFormat(msg, args);
+		org.slf4j.helpers.FormattingTuple tp = org.slf4j.helpers.MessageFormatter.arrayFormat(fmt, args);
 		String timestamp = timeFormatter.getTime(clock);
-		logPrinter.renderLog(getName(), timestamp, lvl, tp.getMessage(), tp.getThrowable());
+		logPrinter.renderLog(getName(), timestamp, lvl, tp.getMessage(), ex);
 	}
 
 	private static Defs.LOGLEVEL mapSlf4jLogLevel(org.slf4j.event.Level lvl) {

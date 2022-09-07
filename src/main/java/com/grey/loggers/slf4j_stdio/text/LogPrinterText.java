@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2021 Yusef Badri - All rights reserved.
+ * Copyright 2014-2022 Yusef Badri - All rights reserved.
  * grey-slf4j-logstdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
  */
 package com.grey.loggers.slf4j_stdio.text;
@@ -15,8 +15,8 @@ public class LogPrinterText implements LogPrinter {
 	private enum FMT_TERM {TOKEN, LITERAL}
 	private enum FMT_TOKEN {TIME, LVL, TID, TNAME, LNAME, MSG}
 
-	private static String TOKEN_START = "{";
-	private static String TOKEN_END = "}";
+	private static final String TOKEN_START = "{";
+	private static final String TOKEN_END = "}";
 
 	private static final String DFLT_FORMAT = makeFormatExpression(FMT_TOKEN.TIME, " ", FMT_TOKEN.LVL, " TID-", FMT_TOKEN.TID, "/", FMT_TOKEN.TNAME,
 			" ", FMT_TOKEN.LNAME, " ", FMT_TOKEN.MSG);
@@ -78,7 +78,7 @@ public class LogPrinterText implements LogPrinter {
 	}
 
 	@Override
-	public void flush() throws java.io.IOException {
+	public void flush() {
 		logStream.flush();
 	}
 
@@ -124,7 +124,7 @@ public class LogPrinterText implements LogPrinter {
 		StringBuilder sb = new StringBuilder();
 		for (Object arg : args) {
 			if (arg instanceof FMT_TOKEN) {
-				sb.append(TOKEN_START).append(arg.toString()).append(TOKEN_END);
+				sb.append(TOKEN_START).append(arg).append(TOKEN_END);
 			} else {
 				sb.append(arg.toString());
 			}
