@@ -15,11 +15,11 @@ To link slf4j-logstdio into your application, add this Maven dependency to your 
 	<dependency>
 		<groupId>com.github.greysoft.loggers</groupId>
 		<artifactId>slf4j-logstdio</artifactId>
-		<version>1.0.0</version>
+		<version>VERSION</version>
 	</dependency>
 
 The above would literally go in a Maven POM, while the Gradle equivalent is:
-	implementation "com.github.greysoft.loggers:slf4j-logstdio:1.0.0"
+	implementation "com.github.greysoft.loggers:slf4j-logstdio:VERSION"
 
 Configuration
 --------------

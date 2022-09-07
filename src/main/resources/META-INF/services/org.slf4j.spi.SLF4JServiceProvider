@@ -1,1 +1,1 @@
-com.grey.loggers.slf4j_stdio.LoggerServiceProvider
+com.grey.loggers.slf4j_stdio.LoggerProvider

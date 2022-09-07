@@ -11,14 +11,14 @@ import org.slf4j.helpers.NOPMDCAdapter;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
 
-public class LoggerServiceProvider implements SLF4JServiceProvider {
-	public static final String REQUESTED_API_VERSION = "2.0.0";
+public class LoggerProvider implements SLF4JServiceProvider {
+	private static final String API_VERSION = "2.0.0";
 
 	private final ILoggerFactory loggerFactory;
 	private final IMarkerFactory markerFactory;
 	private final MDCAdapter mdcAdapter;
 
-	public LoggerServiceProvider() {
+	public LoggerProvider() {
 		loggerFactory = new LoggerFactory();
 		markerFactory = new BasicMarkerFactory();
 		mdcAdapter = new NOPMDCAdapter();
@@ -44,6 +44,6 @@ public class LoggerServiceProvider implements SLF4JServiceProvider {
 
 	@Override
 	public String getRequestedApiVersion() {
-		return REQUESTED_API_VERSION;
+		return API_VERSION;
 	}
 }
