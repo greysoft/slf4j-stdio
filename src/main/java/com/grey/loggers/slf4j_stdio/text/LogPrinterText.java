@@ -67,7 +67,7 @@ public class LogPrinterText implements LogPrinter {
 				}
 				break;
 			case LITERAL:
-				txt = term.getValue().toString();
+				txt = String.valueOf(term.getValue());
 				break;
 			default:
 				throw new IllegalStateException("Missing case for format-term="+term.getType());
@@ -126,7 +126,7 @@ public class LogPrinterText implements LogPrinter {
 			if (arg instanceof FMT_TOKEN) {
 				sb.append(TOKEN_START).append(arg).append(TOKEN_END);
 			} else {
-				sb.append(arg.toString());
+				sb.append(arg);
 			}
 		}
 		return sb.toString();
