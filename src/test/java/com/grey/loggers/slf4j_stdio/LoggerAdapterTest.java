@@ -38,6 +38,7 @@ public class LoggerAdapterTest {
 		log.info("Test msg with param1={}, param2={}", "val1", "val2");
 		log.error("Test msg with param1={}, param2={}, param3={}", "val1", "val2", "val3");
 		log.info("Test msg with param1={} and Throwable", "val1", new Exception("Dumy Exception"));
+		log.info("Test msg with no params and Throwable", new Exception("Dumy Exception"));
 	}
 
 	@Test

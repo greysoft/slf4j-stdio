@@ -19,7 +19,7 @@ public class LogPrinterJson implements LogPrinter {
 	private static final ObjectWriter Serialiser;
 	static {
 		ObjectMapper om = new ObjectMapper();
-		TypeReference<Map<String, ?>> tref = new TypeReference<>(){};
+		TypeReference<Map<String, ?>> tref = new TypeReference<Map<String, ?>>(){};
 		Serialiser = om.writerFor(tref);
 	}
 

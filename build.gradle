@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2021 Yusef Badri - All rights reserved.
+ * Copyright 2014-2022 Yusef Badri - All rights reserved.
  * grey-slf4j-logstdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
  */
 // To upload to Sonatype staging for Maven Central deployment:
@@ -32,6 +32,7 @@ plugins {
 allprojects {
 	group = "$buildGroup"
 	version = "$buildVersion"
+	sourceCompatibility = 1.8
 }
 
 ext.repoHost = project.findProperty('repoHost') ?: 'localhost:8081'
@@ -45,10 +46,10 @@ def nexusRepoReleases = "$nexusRepoStem/maven-releases/"
 def nexusRepoSnapshots = "$nexusRepoStem/maven-snapshots/"
 
 repositories {
-	mavenLocal()
 	maven {
 		name = "nexusrepo-download"
 		url "$nexusRepoDownloads"
+		allowInsecureProtocol = true
 	}
 	jcenter()
 	mavenCentral()
