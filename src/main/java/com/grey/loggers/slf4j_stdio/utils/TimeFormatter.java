@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2021 Yusef Badri - All rights reserved.
+ * Copyright 2014-2022 Yusef Badri - All rights reserved.
  * grey-slf4j-logstdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
  */
 package com.grey.loggers.slf4j_stdio.utils;
@@ -47,14 +47,19 @@ public class TimeFormatter {
 		Instant instant = Instant.ofEpochMilli(millis);
 
 		if (timeFormat == FORMAT.UTC) {
-			return instant.toString();
+			// Instant.toString omits milliseconds fraction if zero, which leads to irregular looking timestamp strings
+			String s = instant.toString();
+			if (millis % 1000 == 0) s = s.substring(0, s.length() - 1)+".000Z";
+			return s;
 		}
 		ZonedDateTime dt = instant.atZone(localZone);
-		return dt.toLocalDate()+" "+dt.toLocalTime();
+		String s = dt.toLocalDate()+" "+dt.toLocalTime();
+		if (millis % 1000 == 0) s = s+".000";
+		return s;
 	}
 
 	@Override
 	public String toString() {
-		return timeFormat+"-"+localZone;
+		return super.toString()+"/"+timeFormat+"-"+localZone;
 	}
 }
