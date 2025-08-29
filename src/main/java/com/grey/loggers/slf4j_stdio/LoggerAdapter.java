@@ -1,11 +1,17 @@
 /*
- * Copyright 2014-2022 Yusef Badri - All rights reserved.
+ * Copyright 2014-2025 Yusef Badri - All rights reserved.
  * grey-slf4j-logstdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
  */
 package com.grey.loggers.slf4j_stdio;
 
 import java.io.PrintStream;
 import java.time.Clock;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import org.slf4j.helpers.FormattingTuple;
 
 import com.grey.loggers.slf4j_stdio.json.LogPrinterJson;
 import com.grey.loggers.slf4j_stdio.text.LogPrinterText;
@@ -30,6 +36,9 @@ public class LoggerAdapter
 	private final Defs.LOGLEVEL cfglvl;
 	private final LogPrinter logPrinter;
 	private final TimeFormatter timeFormatter;
+
+	private final List<Consumer<LogEvent>> listeners = new ArrayList<>();
+	private volatile boolean haveListeners;
 
 	static {
 		System.out.println(Defs.DIAGLOG_PREFIX+"Default Level="+DFLT_LEVEL+", TimeFormat="+DFLT_TIMEFORMATTER);
@@ -81,9 +90,45 @@ public class LoggerAdapter
 	protected void handleNormalizedLoggingCall(org.slf4j.event.Level slf4jLevel, org.slf4j.Marker marker, String fmt, Object[] args, Throwable ex) {
 		Defs.LOGLEVEL lvl = mapSlf4jLogLevel(slf4jLevel);
 		if (!isActive(lvl)) return;
-		org.slf4j.helpers.FormattingTuple tp = org.slf4j.helpers.MessageFormatter.arrayFormat(fmt, args);
-		String timestamp = timeFormatter.getTime(clock);
-		logPrinter.renderLog(getName(), timestamp, lvl, tp.getMessage(), ex);
+
+		Instant timestamp = clock.instant();
+		FormattingTuple tp = org.slf4j.helpers.MessageFormatter.arrayFormat(fmt, args);
+		String formattedMsg = tp.getMessage();
+
+		// listeners will probably only ever exist in test environments, so avoid locking in the general case
+		if (haveListeners) {
+			LogEvent logEvent = new LogEvent(timestamp, slf4jLevel, fmt, args, formattedMsg, ex, Thread.currentThread());
+			synchronized (listeners) {
+				for (Consumer<LogEvent> l : listeners) {
+					l.accept(logEvent);
+				}
+			}
+		}
+
+		String timeText = timeFormatter.getTime(timestamp);
+		logPrinter.renderLog(getName(), timeText, lvl, formattedMsg, ex);
+	}
+
+	public final void addListener(Consumer<LogEvent> listener) {
+		synchronized (listeners) {
+			listeners.remove(listener);
+			listeners.add(listener);
+		}
+		haveListeners = true;
+	}
+
+	public final void removeListener(Consumer<LogEvent> listener) {
+		synchronized (listeners) {
+			for (int idx = 0; idx != listeners.size(); idx++) {
+				if (listeners.get(idx) == listener) {
+					listeners.remove(idx);
+					break;
+				}
+			}
+			if (listeners.isEmpty()) {
+				haveListeners = false;
+			}
+		}
 	}
 
 	private static Defs.LOGLEVEL mapSlf4jLogLevel(org.slf4j.event.Level lvl) {

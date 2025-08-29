@@ -1,13 +1,16 @@
-slf4j-logstdio is a logging framework that prints all logs to standard-output (ie. the console) and more specifically it is an SLF4J adapter library.
+slf4j-logstdio is a logging framework that prints all logs to standard-output (ie. the console) and more specifically it is an SLF4J logger.
 That means you do not call slf4j-logstdio directly, but so long as you have it on your classpath, any logging calls to the SLF4J facade will get transparently routed to slf4j-logstdio.
 
 So why do we need yet another SLF4J-based logger?
 
-1) slf4j-logstdio does not require any configuration files, and is entirely driven from the environment, which can make it easier to control.
+1) slf4j-logstdio does not require any configuration files, and is entirely driven from the environment, which can make it easier to control, especially in a dockerised environment.
 
-2) slf4j-logstdio allows you to log thread IDs, something which the other frameworks resolutely refuse to do, and which can be invaluable for debugging multi-threaded applications, ie. just about any modern real-world application.
+2) slf4j-logstdio allows you to output the logs in JSON format, if you like that sort of thing.
 
-3) slf4j-logstdio allows you to output the logs in JSON format, if you like that sort of thing.
+3) Developer-friendly touches, such as slf4j-logstdio automatically logs thread IDs via the default format, something which other frameworks force you to do manually on every single logging call, which can be invaluable for debugging real-world applications.
+
+4) Test aids, such as providing an API to capture logs and verify them in your build tests.
+See LoggerAdapterTest.testListeners() for an illustration of how to capture logging calls.
 
 Build
 -------
@@ -18,7 +21,7 @@ To link slf4j-logstdio into your application, add this Maven dependency to your 
 		<version>VERSION</version>
 	</dependency>
 
-The above would literally go in a Maven POM, while the Gradle equivalent is:
+The Gradle equivalent is:
 	implementation "com.github.greysoft.loggers:slf4j-logstdio:VERSION"
 
 Configuration

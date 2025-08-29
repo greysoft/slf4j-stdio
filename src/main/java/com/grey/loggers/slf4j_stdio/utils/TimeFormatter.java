@@ -1,10 +1,9 @@
 /*
- * Copyright 2014-2022 Yusef Badri - All rights reserved.
+ * Copyright 2014-2025 Yusef Badri - All rights reserved.
  * grey-slf4j-logstdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
  */
 package com.grey.loggers.slf4j_stdio.utils;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -35,8 +34,8 @@ public class TimeFormatter {
 		return localZone;
 	}
 
-	public String getTime(Clock clock) {
-		long millis = clock.millis();
+	public String getTime(Instant instant) {
+		long millis = instant.toEpochMilli();
 
 		if (timeFormat == FORMAT.MILLISECONDS) {
 			return String.valueOf(millis);
@@ -44,7 +43,6 @@ public class TimeFormatter {
 		if (timeFormat == FORMAT.SECONDS) {
 			return String.valueOf(millis / 1000);
 		}
-		Instant instant = Instant.ofEpochMilli(millis);
 
 		if (timeFormat == FORMAT.UTC) {
 			// Instant.toString omits milliseconds fraction if zero, which leads to irregular looking timestamp strings

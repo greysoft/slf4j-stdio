@@ -1,11 +1,19 @@
 /*
- * Copyright 2014-2022 Yusef Badri - All rights reserved.
+ * Copyright 2014-2025 Yusef Badri - All rights reserved.
  * grey-slf4j-logstdio is distributed under the terms of the GNU Affero General Public License, Version 3 (AGPLv3).
  */
 package com.grey.loggers.slf4j_stdio;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.Test;
 import org.junit.Before;
@@ -13,6 +21,7 @@ import org.junit.Assert;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 public class LoggerAdapterTest {
 	@Before
@@ -236,5 +245,57 @@ public class LoggerAdapterTest {
 		logger.trace("trace1");
 		String s = bstrm.toString();
 		Assert.assertTrue(s, s.isEmpty());
+	}
+
+	@Test
+	public void testListeners() {
+		Logger slf4jLogger = LoggerFactory.getLogger(LoggerAdapterTest.class);
+		LoggerAdapter logger = (LoggerAdapter)slf4jLogger;
+		List<LogEvent> events1 = new ArrayList<>();
+		List<LogEvent> events2 = new ArrayList<>();
+		Consumer<LogEvent> listener1 = (x) -> events1.add(x);
+		Consumer<LogEvent> listener2 = (x) -> events2.add(x);
+		logger.addListener(listener1);
+		logger.addListener(listener2);
+
+		Exception error = new Exception("Dummy error");
+		slf4jLogger.info("Test message with {} param", "one");
+		slf4jLogger.trace("Log that won't be emitted or captured");
+		slf4jLogger.info("Test message with no params");
+		slf4jLogger.error("Test message with {} params {} an error", "two", "and", error);
+		logger.removeListener(listener1);
+		logger.removeListener(listener2);
+
+		assertEquals(events1.toString(), 3, events1.size());
+		LogEvent evt = events1.get(0);
+		assertTrue(events1.toString(), evt.getThread() == Thread.currentThread());
+		assertEquals(events1.toString(), Level.INFO, evt.getLevel());
+		assertEquals(events1.toString(), "Test message with {} param", evt.getFormat());
+		assertEquals(events1.toString(), 1, evt.getArgs().length);
+		assertEquals(events1.toString(), "one", evt.getArgs()[0]);
+		assertEquals(events1.toString(), "Test message with one param", evt.getFormattedMessage());
+		assertNull(events1.toString(), evt.getError());
+		assertTrue(events1.toString(), evt.getTimestamp() instanceof Instant);
+		evt = events1.get(1);
+		assertTrue(events1.toString(), evt.getThread() == Thread.currentThread());
+		assertEquals(events1.toString(), Level.INFO, evt.getLevel());
+		assertEquals(events1.toString(), "Test message with no params", evt.getFormat());
+		assertNull(events1.toString(), evt.getArgs());
+		assertEquals(events1.toString(), evt.getFormat(), evt.getFormattedMessage());
+		assertNull(events1.toString(), evt.getError());
+		evt = events1.get(2);
+		assertTrue(events1.toString(), evt.getThread() == Thread.currentThread());
+		assertEquals(events1.toString(), Level.ERROR, evt.getLevel());
+		assertEquals(events1.toString(), "Test message with {} params {} an error", evt.getFormat());
+		assertEquals(events1.toString(), 2, evt.getArgs().length);
+		assertEquals(events1.toString(), "two", evt.getArgs()[0]);
+		assertEquals(events1.toString(), "and", evt.getArgs()[1]);
+		assertEquals(events1.toString(), "Test message with two params and an error", evt.getFormattedMessage());
+		assertTrue(events1.toString(), evt.getError() == error);
+
+		assertEquals(events1.size(), events2.size());
+		for (int idx = 0; idx != events1.size(); idx++) {
+			assertTrue(events1.get(idx) == events2.get(idx));
+		}
 	}
 }
